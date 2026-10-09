@@ -1,9 +1,11 @@
 <?php
 // Halaman daftar pengajuan sewa.
 
-// JOIN = gabungkan tabel rentals (sewa) dengan cars (mobil) supaya nama mobil ikut tampil
-$hasil = $conn->query("SELECT rentals.*, cars.merk, cars.plat_nomor
+// JOIN = gabungkan tabel rentals (sewa) dengan users (pelanggan) dan cars (mobil)
+// supaya nama pelanggan dan nama mobil ikut tampil
+$hasil = $conn->query("SELECT rentals.*, users.nama, users.email, cars.merk, cars.plat_nomor, cars.harga_sewa_per_hari
                        FROM rentals
+                       LEFT JOIN users ON users.id = rentals.pelanggan_id
                        JOIN cars ON cars.id = rentals.car_id
                        ORDER BY rentals.id DESC");
 ?>
@@ -34,34 +36,47 @@ $hasil = $conn->query("SELECT rentals.*, cars.merk, cars.plat_nomor
 
                         <?php
                         // Warna label status
-                        if ($row['status'] == 'pengajuan') {
+                        if ($row['status_rental'] == 'menunggu') {
                             $warna = 'info';
-                        } elseif ($row['status'] == 'disetujui') {
+                        } elseif ($row['status_rental'] == 'disetujui') {
                             $warna = 'success';
-                        } elseif ($row['status'] == 'ditolak') {
+                        } elseif ($row['status_rental'] == 'ditolak') {
                             $warna = 'danger';
                         } else {
                             $warna = 'secondary';
                         }
+
+                        // Total = lama sewa (hari) x harga per hari, minimal 1 hari
+                        $hari = (strtotime($row['tgl_kembali']) - strtotime($row['tgl_sewa'])) / 86400;
+                        if ($hari < 1) {
+                            $hari = 1;
+                        }
+                        $total = $hari * $row['harga_sewa_per_hari'];
                         ?>
 
                         <tr>
                             <td><?php echo $no; ?></td>
                             <td>
-                                <?php echo htmlspecialchars($row['nama_penyewa']); ?><br>
-                                <small><?php echo htmlspecialchars($row['no_hp']); ?></small>
+                                <?php if ($row['nama'] !== null) { ?>
+                                    <?php echo htmlspecialchars($row['nama']); ?><br>
+                                    <small><?php echo htmlspecialchars($row['email'] ?? ''); ?></small>
+                                <?php } else { ?>
+                                    <!-- Sewa tetap tampil walaupun pelanggan_id tidak ada di tabel users -->
+                                    <span class="text-danger">Pelanggan #<?php echo (int) $row['pelanggan_id']; ?></span><br>
+                                    <small class="text-danger">tidak ditemukan di tabel users</small>
+                                <?php } ?>
                             </td>
                             <td>
                                 <?php echo htmlspecialchars($row['merk']); ?><br>
                                 <small><?php echo htmlspecialchars($row['plat_nomor']); ?></small>
                             </td>
                             <td>
-                                <?php echo date('d/m/Y', strtotime($row['tanggal_mulai'])); ?>
+                                <?php echo date('d/m/Y', strtotime($row['tgl_sewa'])); ?>
                                 s/d
-                                <?php echo date('d/m/Y', strtotime($row['tanggal_selesai'])); ?>
+                                <?php echo date('d/m/Y', strtotime($row['tgl_kembali'])); ?>
                             </td>
-                            <td>Rp <?php echo number_format($row['total_harga'], 0, ',', '.'); ?></td>
-                            <td><span class="badge badge-<?php echo $warna; ?>"><?php echo $row['status']; ?></span></td>
+                            <td>Rp <?php echo number_format($total, 0, ',', '.'); ?></td>
+                            <td><span class="badge badge-<?php echo $warna; ?>"><?php echo $row['status_rental']; ?></span></td>
                             <td>
                                 <a href="index.php?page=sewa-edit&id=<?php echo $row['id']; ?>" class="btn btn-warning btn-sm">Proses</a>
 

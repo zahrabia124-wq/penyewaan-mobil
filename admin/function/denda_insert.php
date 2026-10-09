@@ -1,5 +1,6 @@
 <?php
 // Memproses form "Tambah Denda".
+// Denda disimpan di tabel returns (kolom: rental_id, tgl_dikembalikan, denda, kondisi_mobil).
 
 require_once __DIR__ . '/../database/connection.php';
 $db   = new Database();
@@ -10,26 +11,27 @@ if ($_SERVER['REQUEST_METHOD'] != 'POST') {
     exit;
 }
 
-// 1. Ambil data dari form
-$rental_id  = (int) $_POST['rental_id'];
-$jenis      = $_POST['jenis'];
-$jumlah     = (float) $_POST['jumlah'];
-$keterangan = trim($_POST['keterangan']);
+// 1. Ambil data dari form (nama field harus sama dengan di pages/denda/tambah.php)
+$rental_id        = (int) ($_POST['rental_id'] ?? 0);
+$tgl_dikembalikan = $_POST['tgl_dikembalikan'] ?? '';
+$denda            = (float) ($_POST['denda'] ?? 0);
+$kondisi_mobil    = trim($_POST['kondisi_mobil'] ?? '');
 
 // 2. Cek isian
-if ($rental_id == 0 || $jumlah <= 0) {
-    header('Location: ../index.php?page=denda-tambah');
-    exit;
+if ($rental_id == 0 || $denda <= 0 || $tgl_dikembalikan == '') {
+    die('Data belum lengkap. <a href="../index.php?page=denda-tambah">Kembali</a>');
 }
 
 // 3. Simpan ke database
 try {
-    $stmt = $conn->prepare("INSERT INTO fines (rental_id, jenis, jumlah, keterangan) VALUES (?, ?, ?, ?)");
-    $stmt->bind_param('isds', $rental_id, $jenis, $jumlah, $keterangan);
+    $stmt = $conn->prepare("INSERT INTO returns (rental_id, tgl_dikembalikan, denda, kondisi_mobil) VALUES (?, ?, ?, ?)");
+    $stmt->bind_param('isds', $rental_id, $tgl_dikembalikan, $denda, $kondisi_mobil);
     $stmt->execute();
+    $stmt->close();
 
     header('Location: ../index.php?page=denda');
 } catch (Exception $e) {
-    header('Location: ../index.php?page=denda-tambah');
+    // Tampilkan error supaya mudah dicari penyebabnya
+    die('Gagal menyimpan denda: ' . htmlspecialchars($e->getMessage()) . ' <a href="../index.php?page=denda-tambah">Kembali</a>');
 }
 exit;

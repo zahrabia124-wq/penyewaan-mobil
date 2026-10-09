@@ -1,6 +1,7 @@
 <?php
-// Form tambah pengajuan sewa.
+// Form tambah pengajuan sewa. Saat disimpan, data dikirim ke function/sewa_insert.php
 // Pilihan mobil hanya menampilkan mobil yang statusnya "tersedia".
+$users = $conn->query("SELECT * FROM users ORDER BY nama");
 $mobil = $conn->query("SELECT *, harga_sewa_per_hari AS harga_per_hari FROM cars WHERE status_mobil = 'tersedia' ORDER BY merk");
 ?>
 
@@ -14,13 +15,15 @@ $mobil = $conn->query("SELECT *, harga_sewa_per_hari AS harga_per_hari FROM cars
         <form action="function/sewa_insert.php" method="POST">
 
             <div class="form-group">
-                <label>Nama Penyewa</label>
-                <input type="text" name="nama_penyewa" class="form-control" required>
-            </div>
-
-            <div class="form-group">
-                <label>No. HP</label>
-                <input type="text" name="no_hp" class="form-control" required>
+                <label>Pelanggan</label>
+                <select name="pelanggan_id" class="form-control" required>
+                    <option value="">-- Pilih pelanggan --</option>
+                    <?php while ($u = $users->fetch_assoc()) { ?>
+                        <option value="<?php echo $u['id']; ?>">
+                            <?php echo htmlspecialchars($u['nama']); ?> (<?php echo htmlspecialchars($u['email']); ?>)
+                        </option>
+                    <?php } ?>
+                </select>
             </div>
 
             <div class="form-group">
@@ -37,13 +40,13 @@ $mobil = $conn->query("SELECT *, harga_sewa_per_hari AS harga_per_hari FROM cars
             </div>
 
             <div class="form-group">
-                <label>Tanggal Mulai</label>
-                <input type="date" name="tanggal_mulai" class="form-control" required>
+                <label>Tanggal Sewa</label>
+                <input type="date" name="tgl_sewa" class="form-control" required>
             </div>
 
             <div class="form-group">
-                <label>Tanggal Selesai</label>
-                <input type="date" name="tanggal_selesai" class="form-control" required>
+                <label>Tanggal Kembali</label>
+                <input type="date" name="tgl_kembali" class="form-control" required>
             </div>
 
             <p class="text-muted">Total harga dihitung otomatis: lama sewa x harga per hari.</p>
