@@ -26,7 +26,7 @@ $users = $conn->query("SELECT * FROM users ORDER BY id");
 
 <div class="card shadow mb-4">
     <div class="card-body">
-        <form action="function/armada_update.php" method="POST">
+        <form action="function/armada_update.php" method="POST" enctype="multipart/form-data">
 
             <input type="hidden" name="id" value="<?php echo $mobil['id']; ?>">
 
@@ -69,6 +69,15 @@ $users = $conn->query("SELECT * FROM users ORDER BY id");
                         </option>
                     <?php } ?>
                 </select>
+            </div>
+
+            <div class="form-group">
+                <label>Foto Mobil</label>
+                <?php if ($mobil['foto'] != '') { ?>
+                    <div><img src="../uploads/mobil/<?php echo $mobil['foto']; ?>" width="200"></div>
+                <?php } ?>
+                <input type="file" name="foto" class="form-control-file" accept="image/jpeg,image/png">
+                <small class="text-muted">Kosongkan jika tidak ingin mengganti foto. JPG atau PNG, maksimal 2 MB.</small>
             </div>
 
             <button type="submit" class="btn btn-primary">Simpan Perubahan</button>

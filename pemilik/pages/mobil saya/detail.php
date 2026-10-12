@@ -3,7 +3,7 @@
 // Hanya bisa dibuka kalau mobil tersebut milik pemilik yang login.
 $id = (int) ($_GET['id'] ?? 0);
 
-$stmt = $conn->prepare("SELECT id, merk, plat_nomor, harga_sewa_per_hari, status_mobil
+$stmt = $conn->prepare("SELECT id, foto, merk, plat_nomor, harga_sewa_per_hari, status_mobil
                         FROM cars
                         WHERE id = ? AND pemilik_id = ?");
 $stmt->bind_param('ii', $id, $pemilikId);
@@ -35,6 +35,9 @@ $hasil = $stmt->get_result();
 
 <div class="card shadow mb-4">
     <div class="card-body">
+        <?php if ($mobil['foto'] != '') { ?>
+            <img src="../uploads/mobil/<?php echo $mobil['foto']; ?>" width="300">
+        <?php } ?>
         <table class="table table-sm table-borderless">
             <tr><td width="160">Merk</td><td>: <?php echo htmlspecialchars($mobil['merk']); ?></td></tr>
             <tr><td>Plat Nomor</td><td>: <?php echo htmlspecialchars($mobil['plat_nomor']); ?></td></tr>

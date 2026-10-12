@@ -1,5 +1,12 @@
 <?php
 session_start();
+header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0");
+header("Pragma: no-cache");
+// Hanya boleh dibuka oleh role pemilik
+if (!isset($_SESSION['role']) || $_SESSION['role'] != 'pemilik') {
+    header("Location: ../login/login.php?belum_login=1");
+    exit;
+}
 require_once __DIR__ . '/database/connection.php';
 $db = new Database();
 $conn = $db->conn;
@@ -83,15 +90,15 @@ $halaman = ($page !== 'dashboard' && isset($routes[$page]))
         <div class="modal-dialog" role="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="exampleModalLabel">Ready to Leave?</h5>
+                    <h5 class="modal-title" id="exampleModalLabel">Yakin ingin keluar?</h5>
                     <button class="close" type="button" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">×</span>
                     </button>
                 </div>
-                <div class="modal-body">Select "Logout" below if you are ready to end your current session.</div>
+                <div class="modal-body">Klik "Logout" jika Anda ingin mengakhiri sesi ini.</div>
                 <div class="modal-footer">
-                    <button class="btn btn-secondary" type="button" data-dismiss="modal">Cancel</button>
-                    <a class="btn btn-primary" href="login.html">Logout</a>
+                    <button class="btn btn-secondary" type="button" data-dismiss="modal">Batal</button>
+                    <a class="btn btn-primary" href="../login/logout.php">Logout</a>
                 </div>
             </div>
         </div>

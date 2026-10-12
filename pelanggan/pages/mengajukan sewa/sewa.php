@@ -72,7 +72,7 @@ $hasil = $stmt->get_result();
                             <td>
                                 <?php if ($row['status_rental'] == 'menunggu') { ?>
                                     <!-- Pengajuan hanya bisa dibatalkan selama masih menunggu -->
-                                    <form action="function/sewa_delete.php" method="POST" style="display:inline"
+                                    <form action="pelanggan/function/sewa_delete.php" method="POST" style="display:inline"
                                           onsubmit="return confirm('Yakin batalkan pengajuan ini?')">
                                         <input type="hidden" name="id" value="<?php echo $row['id']; ?>">
                                         <button type="submit" class="btn btn-danger btn-sm">Batalkan</button>

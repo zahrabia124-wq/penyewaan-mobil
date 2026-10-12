@@ -12,7 +12,7 @@ $mobil = $conn->query("SELECT *, harga_sewa_per_hari AS harga_per_hari FROM cars
 
 <div class="card shadow mb-4">
     <div class="card-body">
-        <form action="function/sewa_insert.php" method="POST">
+        <form action="pelanggan/function/sewa_insert.php" method="POST">
 
             <div class="form-group">
                 <label>Mobil</label>

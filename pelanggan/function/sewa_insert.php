@@ -9,7 +9,7 @@ $conn = $db->conn;
 
 // Kalau file ini dibuka langsung (bukan dari form), kembalikan ke daftar
 if ($_SERVER['REQUEST_METHOD'] != 'POST') {
-    header('Location: ../index.php?page=sewa');
+    header('Location: ../../index.php?page=sewa');
     exit;
 }
 
@@ -23,7 +23,7 @@ $tgl_kembali = $_POST['tgl_kembali'];
 
 // 2. Cek isian
 if ($car_id == 0 || $tgl_sewa == '' || $tgl_kembali == '' || $tgl_kembali < $tgl_sewa) {
-    header('Location: ../index.php?page=sewa-tambah');
+    header('Location: ../../index.php?page=sewa-tambah');
     exit;
 }
 
@@ -35,7 +35,7 @@ try {
     $car = $stmt->get_result()->fetch_assoc();
 
     if (!$car || $car['status_mobil'] != 'tersedia') {
-        header('Location: ../index.php?page=sewa-tambah');
+        header('Location: ../../index.php?page=sewa-tambah');
         exit;
     }
 
@@ -45,8 +45,8 @@ try {
     $stmt->bind_param('iiss', $pelangganId, $car_id, $tgl_sewa, $tgl_kembali);
     $stmt->execute();
 
-    header('Location: ../index.php?page=sewa');
+    header('Location: ../../index.php?page=sewa');
 } catch (Exception $e) {
-    header('Location: ../index.php?page=sewa-tambah');
+    header('Location: ../../index.php?page=sewa-tambah');
 }
 exit;

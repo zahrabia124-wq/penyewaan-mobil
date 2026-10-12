@@ -18,6 +18,7 @@ $hasil = $conn->query("SELECT *, harga_sewa_per_hari AS harga_per_hari, status_m
                 <thead>
                     <tr>
                         <th>No</th>
+                        <th>Foto</th>
                         <th>Merk</th>
                         <th>Plat Nomor</th>
                         <th>Harga / Hari</th>
@@ -44,6 +45,13 @@ $hasil = $conn->query("SELECT *, harga_sewa_per_hari AS harga_per_hari, status_m
 
                         <tr>
                             <td><?php echo $no; ?></td>
+                            <td>
+                                <?php if ($row['foto'] != '') { ?>
+                                    <img src="../uploads/mobil/<?php echo $row['foto']; ?>" width="90">
+                                <?php } else { ?>
+                                    -
+                                <?php } ?>
+                            </td>
                             <td><?php echo htmlspecialchars($row['merk']); ?></td>
                             <td><?php echo htmlspecialchars($row['plat_nomor']); ?></td>
                             <td>Rp <?php echo number_format($row['harga_per_hari'], 0, ',', '.'); ?></td>

@@ -10,7 +10,7 @@ $users = $conn->query("SELECT * FROM users ORDER BY id");
 
 <div class="card shadow mb-4">
     <div class="card-body">
-        <form action="function/armada_insert.php" method="POST">
+        <form action="function/armada_insert.php" method="POST" enctype="multipart/form-data">
 
             <div class="form-group">
                 <label>Merk / Tipe</label>
@@ -44,6 +44,12 @@ $users = $conn->query("SELECT * FROM users ORDER BY id");
                         <option value="<?php echo $u['id']; ?>">#<?php echo $u['id']; ?> - <?php echo htmlspecialchars($u['nama'] ?? $u['name'] ?? $u['username'] ?? $u['email'] ?? ''); ?></option>
                     <?php } ?>
                 </select>
+            </div>
+
+            <div class="form-group">
+                <label>Foto Mobil</label>
+                <input type="file" name="foto" class="form-control-file" accept="image/jpeg,image/png">
+                <small class="text-muted">JPG atau PNG, maksimal 2 MB.</small>
             </div>
 
             <button type="submit" class="btn btn-primary">Simpan</button>

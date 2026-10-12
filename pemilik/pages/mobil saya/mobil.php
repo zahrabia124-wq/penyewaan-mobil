@@ -3,7 +3,7 @@
 // $conn = koneksi database, $pemilikId = id pemilik, dibuat di index.php
 
 // 1. Ambil mobil milik pemilik + jumlah sewa, total hari, dan pendapatan tiap mobil
-$hasil = $conn->query("SELECT cars.id, cars.merk, cars.plat_nomor,
+$hasil = $conn->query("SELECT cars.id, cars.foto, cars.merk, cars.plat_nomor,
                               cars.harga_sewa_per_hari AS harga_per_hari, cars.status_mobil AS status,
                               (SELECT COUNT(*) FROM rentals
                                WHERE rentals.car_id = cars.id
@@ -31,6 +31,7 @@ $hasil = $conn->query("SELECT cars.id, cars.merk, cars.plat_nomor,
                 <thead>
                     <tr>
                         <th>No</th>
+                        <th>Foto</th>
                         <th>Merk</th>
                         <th>Plat Nomor</th>
                         <th>Harga / Hari</th>
@@ -60,6 +61,13 @@ $hasil = $conn->query("SELECT cars.id, cars.merk, cars.plat_nomor,
 
                         <tr>
                             <td><?php echo $no; ?></td>
+                            <td>
+                                <?php if ($row['foto'] != '') { ?>
+                                    <img src="../uploads/mobil/<?php echo $row['foto']; ?>" width="90">
+                                <?php } else { ?>
+                                    -
+                                <?php } ?>
+                            </td>
                             <td><?php echo htmlspecialchars($row['merk']); ?></td>
                             <td><?php echo htmlspecialchars($row['plat_nomor']); ?></td>
                             <td>Rp <?php echo number_format($row['harga_per_hari'], 0, ',', '.'); ?></td>
@@ -76,7 +84,7 @@ $hasil = $conn->query("SELECT cars.id, cars.merk, cars.plat_nomor,
                     <?php } ?>
 
                     <?php if ($no == 1) { ?>
-                        <tr><td colspan="9" class="text-center text-muted">Belum ada mobil atas nama Anda.</td></tr>
+                        <tr><td colspan="10" class="text-center text-muted">Belum ada mobil atas nama Anda.</td></tr>
                     <?php } ?>
                 </tbody>
             </table>
