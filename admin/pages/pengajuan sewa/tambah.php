@@ -1,7 +1,8 @@
 <?php
 // Form tambah pengajuan sewa. Saat disimpan, data dikirim ke function/sewa_insert.php
 // Pilihan mobil hanya menampilkan mobil yang statusnya "tersedia".
-$users = $conn->query("SELECT * FROM users ORDER BY nama");
+// Hanya user dengan role pelanggan yang bisa dipilih sebagai penyewa
+$users = $conn->query("SELECT * FROM users WHERE role LIKE '%pelanggan%' ORDER BY nama");
 $mobil = $conn->query("SELECT *, harga_sewa_per_hari AS harga_per_hari FROM cars WHERE status_mobil = 'tersedia' ORDER BY merk");
 ?>
 

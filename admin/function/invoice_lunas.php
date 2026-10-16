@@ -1,4 +1,5 @@
 <?php
+require_once __DIR__ . '/../../login/cek_login.php'; cek_login('admin');
 // Mengubah status_pembayaran di tabel payments (lunas / belum_bayar).
 require_once __DIR__ . '/../database/connection.php';
 $db = new Database();

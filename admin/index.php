@@ -1,13 +1,6 @@
 <?php
-session_start();
-// Hanya boleh dibuka oleh role admin
-if (!isset($_SESSION['role']) || $_SESSION['role'] != 'admin') {
-    header("Location: ../login/login.php?belum_login=1");
-    exit;
-}
-// Cegah halaman tersimpan di cache (supaya tombol Back setelah logout tidak menampilkan halaman)
-header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0");
-header("Pragma: no-cache");
+require_once __DIR__ . '/../login/cek_login.php';
+cek_login('admin');
 require_once __DIR__ . '/database/connection.php';
 $db = new Database();
 $conn = $db->conn;
@@ -27,6 +20,8 @@ $routes = [
     'invoice'         => 'pages/terbitkan invoice/invoice.php',
     'invoice-tambah'  => 'pages/terbitkan invoice/tambah.php',
     'invoice-edit'    => 'pages/terbitkan invoice/edit.php',
+    'pengguna'        => 'pages/pengguna/pengguna.php',
+    'pengguna-tambah' => 'pages/pengguna/tambah.php',
 ];
 $halaman = ($page !== 'dashboard' && isset($routes[$page]))
     ? $routes[$page]
@@ -90,7 +85,7 @@ $halaman = ($page !== 'dashboard' && isset($routes[$page]))
                 <div class="modal-body">Klik "Logout" jika Anda ingin mengakhiri sesi ini.</div>
                 <div class="modal-footer">
                     <button class="btn btn-secondary" type="button" data-dismiss="modal">Batal</button>
-                    <a class="btn btn-primary" href="../login/logout.php">Logout</a>
+                    <a class="btn btn-primary" href="../login/logout.php?role=admin">Logout</a>
                 </div>
             </div>
         </div>

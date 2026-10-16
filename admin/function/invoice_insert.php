@@ -1,4 +1,5 @@
 <?php
+require_once __DIR__ . '/../../login/cek_login.php'; cek_login('admin');
 // Menyimpan invoice baru ke tabel payments.
 // Total tagihan = (jumlah hari x harga sewa per hari) + total denda, sama seperti di tambah.php.
 require_once __DIR__ . '/../database/connection.php';

@@ -1,27 +1,15 @@
 <?php
-session_start();
-header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0");
-header("Pragma: no-cache");
-// Hanya boleh dibuka oleh role pemilik
-if (!isset($_SESSION['role']) || $_SESSION['role'] != 'pemilik') {
-    header("Location: ../login/login.php?belum_login=1");
-    exit;
-}
+date_default_timezone_set('Asia/Jakarta'); // jam server mengikuti WIB
+require_once __DIR__ . '/../login/cek_login.php';
+cek_login('pemilik');
 require_once __DIR__ . '/database/connection.php';
 $db = new Database();
 $conn = $db->conn;
 $page = $_GET['page'] ?? 'dashboard';
 
 // ===== DATA PEMILIK YANG LOGIN =====
-// Sesuaikan key session dengan kode login-mu (di sini dipakai $_SESSION['id'] atau $_SESSION['user_id'])
-$pemilikId = (int) ($_SESSION['id'] ?? $_SESSION['user_id'] ?? 0);
-
-// SEMENTARA (sebelum login jadi): kalau belum ada session, pakai pemilik pertama di tabel users.
-// Hapus blok ini kalau login sudah terhubung.
-if ($pemilikId == 0) {
-    $qPemilik = $conn->query("SELECT id FROM users WHERE role = 'pemilik' ORDER BY id LIMIT 1");
-    $pemilikId = $qPemilik ? (int) ($qPemilik->fetch_row()[0] ?? 0) : 0;
-}
+// Sesi sudah dijamin ada dan role-nya 'pemilik' oleh cek_login()
+$pemilikId = (int) $_SESSION['id'];
 
 $qNama = $conn->query("SELECT nama FROM users WHERE id = $pemilikId");
 $namaPemilik = $qNama ? ($qNama->fetch_row()[0] ?? 'Pemilik') : 'Pemilik';
@@ -98,7 +86,7 @@ $halaman = ($page !== 'dashboard' && isset($routes[$page]))
                 <div class="modal-body">Klik "Logout" jika Anda ingin mengakhiri sesi ini.</div>
                 <div class="modal-footer">
                     <button class="btn btn-secondary" type="button" data-dismiss="modal">Batal</button>
-                    <a class="btn btn-primary" href="../login/logout.php">Logout</a>
+                    <a class="btn btn-primary" href="../login/logout.php?role=pemilik">Logout</a>
                 </div>
             </div>
         </div>

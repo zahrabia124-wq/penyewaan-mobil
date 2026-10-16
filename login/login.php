@@ -1,6 +1,5 @@
 <?php
 // Halaman login E-Rent (folder login/, sejajar dengan admin, pelanggan, pemilik)
-session_start();
 
 require_once __DIR__ . '/../admin/database/connection.php';
 
@@ -11,11 +10,11 @@ $tujuan = [
     'pemilik'   => '../pemilik/index.php',
 ];
 
-// Kalau sudah login, langsung arahkan ke halamannya
-if (isset($_SESSION['role']) && isset($tujuan[$_SESSION['role']])) {
-    header('Location: ' . $tujuan[$_SESSION['role']]);
-    exit;
-}
+// Form login selalu ditampilkan (tidak dilempar otomatis), supaya bisa ganti akun.
+// Login baru akan menimpa sesi lama.
+
+// Kalau datang dari tombol "Ajukan Sewa" (belum login), ingat mobil yang dipilih
+$carId  = (int) ($_GET['car_id'] ?? 0);
 
 $error  = '';
 $info   = '';
@@ -24,8 +23,14 @@ $email  = '';
 if (isset($_GET['logout'])) {
     $info = 'Anda sudah berhasil keluar.';
 }
+if (isset($_GET['gagal'])) {
+    $error = 'Email atau password salah.';
+}
 if (isset($_GET['belum_login'])) {
     $error = 'Silakan login terlebih dahulu.';
+}
+if (isset($_GET['daftar'])) {
+    $info = 'Pendaftaran berhasil. Silakan login.';
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -65,11 +70,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
 
         if ($cocok && isset($tujuan[$user['role']])) {
+            // Tiap role punya sesi sendiri, jadi login role lain tidak menimpa yang ini
+            session_name('erent_' . $user['role']);
+            session_start();
+            $_SESSION = [];
             session_regenerate_id(true);
             $_SESSION['id']    = (int) $user['id'];
             $_SESSION['nama']  = $user['nama'];
             $_SESSION['email'] = $user['email'];
             $_SESSION['role']  = $user['role'];
+
+            // Pelanggan yang tadi mau menyewa mobil -> langsung ke form pengajuan
+            if ($user['role'] === 'pelanggan' && $carId > 0) {
+                header('Location: ../pelanggan/ajukan.php?car_id=' . $carId);
+                exit;
+            }
 
             header('Location: ' . $tujuan[$user['role']]);
             exit;
@@ -125,7 +140,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 </div>
             <?php } ?>
 
-            <form method="post" action="login.php" autocomplete="off">
+            <form method="post" action="login.php<?= $carId > 0 ? '?car_id=' . $carId : '' ?>" autocomplete="off">
                 <div class="form-group">
                     <label for="email" class="small font-weight-bold text-gray-700">Email</label>
                     <input type="email" class="form-control form-control-user" id="email" name="email"
@@ -146,6 +161,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <i class="fas fa-sign-in-alt mr-1"></i> Login
                 </button>
             </form>
+
+            <hr>
+            <div class="text-center small">
+                Belum punya akun? <a href="register.php">Daftar sebagai pelanggan</a>
+            </div>
         </div>
     </div>
 </div>

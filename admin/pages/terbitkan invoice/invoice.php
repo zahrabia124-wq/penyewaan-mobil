@@ -48,16 +48,8 @@ $hasil = $conn->query("SELECT users.*, payments.id AS payment_id, payments.total
                             <td>Rp <?php echo number_format($row['total_bayar'], 0, ',', '.'); ?></td>
                             <td><span class="badge badge-<?php echo $warna; ?>"><?php echo $teks; ?></span></td>
                             <td>
-                                <?php if ($row['status_pembayaran'] == 'lunas') { ?>
-                                    <!-- Batalkan status lunas (kalau salah klik) -->
-                                    <form action="function/invoice_lunas.php" method="POST" style="display:inline"
-                                          onsubmit="return confirm('Kembalikan status ke belum bayar?')">
-                                        <input type="hidden" name="id" value="<?php echo $row['payment_id']; ?>">
-                                        <input type="hidden" name="status" value="belum_bayar">
-                                        <button type="submit" class="btn btn-secondary btn-sm">Batalkan Lunas</button>
-                                    </form>
-                                <?php } else { ?>
-                                    <!-- Tandai sudah dibayar -->
+                                <?php if ($row['status_pembayaran'] != 'lunas') { ?>
+                                    <!-- Tandai sudah dibayar. Untuk mengembalikan ke belum bayar, pakai tombol Edit -->
                                     <form action="function/invoice_lunas.php" method="POST" style="display:inline"
                                           onsubmit="return confirm('Tandai invoice ini sudah lunas?')">
                                         <input type="hidden" name="id" value="<?php echo $row['payment_id']; ?>">

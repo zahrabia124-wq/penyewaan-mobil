@@ -1,6 +1,7 @@
 <?php
 // Form tambah armada. Saat disimpan, data dikirim ke function/armada_insert.php
-$users = $conn->query("SELECT * FROM users ORDER BY id");
+// Hanya user dengan role pemilik yang bisa dipilih sebagai pemilik armada
+$users = $conn->query("SELECT * FROM users WHERE role LIKE '%pemilik%' ORDER BY id");
 ?>
 
 <div class="d-sm-flex align-items-center justify-content-between mb-4">
@@ -45,13 +46,11 @@ $users = $conn->query("SELECT * FROM users ORDER BY id");
                     <?php } ?>
                 </select>
             </div>
-
-            <div class="form-group">
+                     <div class="form-group">
                 <label>Foto Mobil</label>
                 <input type="file" name="foto" class="form-control-file" accept="image/jpeg,image/png">
-                <small class="text-muted">JPG atau PNG, maksimal 2 MB.</small>
+                <small class="text-muted">JPG atau PNG, maksimal 2 MB. Boleh dikosongkan.</small>
             </div>
-
             <button type="submit" class="btn btn-primary">Simpan</button>
         </form>
     </div>

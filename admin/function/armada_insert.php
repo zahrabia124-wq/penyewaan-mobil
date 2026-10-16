@@ -1,4 +1,5 @@
 <?php
+require_once __DIR__ . '/../../login/cek_login.php'; cek_login('admin');
 require_once __DIR__ . '/../database/connection.php';
 $db = new Database();
 $conn = $db->conn;
@@ -14,42 +15,57 @@ $harga  = (float)($_POST['harga_per_hari'] ?? 0);
 $status = $_POST['status'] ?? 'tersedia';
 $owner  = (int)($_POST['pemilik_id'] ?? 0);
 
-if ($merk == '' || $plat == '' || $owner <= 0 || $harga <= 0 || ($status != 'tersedia' && $status != 'disewa' && $status != 'perawatan')) {
+if ($merk == '' || $plat == '' || $owner <= 0 || $harga <= 0 || !in_array($status, ['tersedia', 'disewa', 'perawatan'])) {
     header('Location: ../index.php?page=armada-tambah&status=gagal&pesan=' . urlencode('Data tidak valid, periksa isian form.'));
     exit;
 }
 
-// ---- Upload foto (boleh dikosongkan) ----
-$foto = '';
-if ($_FILES['foto']['name'] != '') {
+// ---- Proses upload foto (opsional) ----
+$namaFoto = '';
+if (isset($_FILES['foto']) && $_FILES['foto']['error'] !== UPLOAD_ERR_NO_FILE) {
+    $f = $_FILES['foto'];
 
-    // 3 huruf terakhir nama file, contoh: jpg
-    $akhir = strtolower(substr($_FILES['foto']['name'], -3));
+    if ($f['error'] !== UPLOAD_ERR_OK) {
+        header('Location: ../index.php?page=armada-tambah&status=gagal&pesan=' . urlencode('Upload foto gagal (kode ' . $f['error'] . '). Cek ukuran file.'));
+        exit;
+    }
+    if ($f['size'] > 2 * 1024 * 1024) {
+        header('Location: ../index.php?page=armada-tambah&status=gagal&pesan=' . urlencode('Ukuran foto maksimal 2 MB.'));
+        exit;
+    }
 
-    if ($akhir != 'jpg' && $akhir != 'png') {
+    // Cek tipe file asli (bukan cuma dari ekstensi)
+    $finfo = new finfo(FILEINFO_MIME_TYPE);
+    $mime  = $finfo->file($f['tmp_name']);
+    $boleh = ['image/jpeg' => 'jpg', 'image/png' => 'png'];
+    if (!isset($boleh[$mime])) {
         header('Location: ../index.php?page=armada-tambah&status=gagal&pesan=' . urlencode('Foto harus berformat JPG atau PNG.'));
         exit;
     }
 
-    // Nama foto ditambah waktu supaya tidak kembar
-    $foto = time() . '_' . $_FILES['foto']['name'];
-
-    // Lokasi folder foto (di sebelah folder admin). Kalau belum ada, dibuat otomatis
-    $folder = __DIR__ . '/../../uploads/mobil/';
+    // Folder foto: penyewaan-mobil/foto/
+    $folder = realpath(__DIR__ . '/../../') . '/foto/';
     if (!is_dir($folder)) {
         mkdir($folder, 0777, true);
     }
 
-    // Simpan foto ke folder tersebut
-    move_uploaded_file($_FILES['foto']['tmp_name'], $folder . $foto);
+    $namaFoto = 'mobil_' . time() . '_' . bin2hex(random_bytes(4)) . '.' . $boleh[$mime];
+    if (!move_uploaded_file($f['tmp_name'], $folder . $namaFoto)) {
+        header('Location: ../index.php?page=armada-tambah&status=gagal&pesan=' . urlencode('Gagal menyimpan file foto ke folder foto.'));
+        exit;
+    }
 }
 
 try {
     $stmt = $conn->prepare("INSERT INTO cars (pemilik_id, merk, plat_nomor, harga_sewa_per_hari, status_mobil, foto) VALUES (?, ?, ?, ?, ?, ?)");
-    $stmt->bind_param('issdss', $owner, $merk, $plat, $harga, $status, $foto);
+    $stmt->bind_param('issdss', $owner, $merk, $plat, $harga, $status, $namaFoto);
     $stmt->execute();
     header('Location: ../index.php?page=armada&status=sukses&pesan=' . urlencode('Armada berhasil ditambahkan.'));
 } catch (Exception $e) {
+    // Kalau simpan ke database gagal, hapus foto yang sudah terlanjur diupload
+    if ($namaFoto != '' && file_exists($folder . $namaFoto)) {
+        unlink($folder . $namaFoto);
+    }
     $pesan = ($e->getCode() == 1062) ? 'Plat nomor sudah terdaftar.' : 'Gagal menyimpan: ' . $e->getMessage();
     header('Location: ../index.php?page=armada-tambah&status=gagal&pesan=' . urlencode($pesan));
 }

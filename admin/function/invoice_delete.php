@@ -1,4 +1,5 @@
 <?php
+require_once __DIR__ . '/../../login/cek_login.php'; cek_login('admin');
 // Menghapus 1 invoice berdasarkan id.
 
 require_once __DIR__ . '/../database/connection.php';

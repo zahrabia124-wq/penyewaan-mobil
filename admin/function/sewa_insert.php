@@ -1,4 +1,5 @@
 <?php
+require_once __DIR__ . '/../../login/cek_login.php'; cek_login('admin');
 // Memproses form "Tambah Pengajuan Sewa".
 // Alur: terima data -> cek data -> simpan -> kembali ke daftar.
 

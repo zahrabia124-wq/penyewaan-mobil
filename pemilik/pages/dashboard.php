@@ -4,7 +4,7 @@
 $STATUS_TERSEDIA  = 'tersedia';   // cars.status_mobil
 $STATUS_DISEWA    = 'disewa';     // cars.status_mobil
 $STATUS_LUNAS     = 'lunas';      // payments.status_pembayaran
-$SEWA_SAH         = "'disetujui','selesai'"; // rentals.status_rental yang dihitung sebagai sewa
+$SEWA_SAH         = "'disetujui','berjalan','selesai'"; // rentals.status_rental yang dihitung sebagai sewa
 
 function angka($conn, $sql) {
     $r = $conn->query($sql);

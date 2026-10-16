@@ -1,4 +1,5 @@
 <?php
+require_once __DIR__ . '/../../login/cek_login.php'; cek_login('admin');
 // Memproses form "Tambah Denda".
 // Denda disimpan di tabel returns (kolom: rental_id, tgl_dikembalikan, denda, kondisi_mobil).
 

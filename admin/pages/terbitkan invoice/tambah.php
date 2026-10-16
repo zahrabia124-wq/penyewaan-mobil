@@ -43,8 +43,6 @@ $sewa = $conn->query("SELECT users.nama, rentals.id AS rental_id, rentals.tgl_se
                 </select>
             </div>
 
-            <p class="text-muted">Total tagihan = total sewa + denda pada sewa tersebut (dihitung otomatis).</p>
-
             <button type="submit" class="btn btn-primary">Terbitkan</button>
         </form>
     </div>

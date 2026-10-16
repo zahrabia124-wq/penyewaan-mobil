@@ -1,85 +1,71 @@
 <?php
-session_start();
-header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0");
-header("Pragma: no-cache");
-// Hanya boleh dibuka oleh role pelanggan
-if (!isset($_SESSION['role']) || $_SESSION['role'] != 'pelanggan') {
-    header("Location: login/login.php?belum_login=1");
-    exit;
+// Pengunjung boleh melihat-lihat tanpa login.
+// Sesi pelanggan memakai nama 'erent_pelanggan' (sama seperti di login/cek_login.php).
+if (session_status() === PHP_SESSION_NONE) {
+    session_name('erent_pelanggan');
+    session_start();
 }
+$urlLogin   = 'login/login.php';
+$sudahLogin = (($_SESSION['role'] ?? '') === 'pelanggan');
 require_once __DIR__ . '/pelanggan/database/connection.php';
 $db = new Database();
 $conn = $db->conn;
 
-// Template SB Admin 2 ada di folder pelanggan/template
-$tpl = 'pelanggan/template';
+// Folder aset template Logis (isinya: css, js, img, vendor)
+$tpl = 'pelanggan/template/assets';
 
-// Data pelanggan yang sedang login (dari session)
-$pelangganId   = (int) $_SESSION['id'];
-$namaPelanggan = $_SESSION['nama'];
-
-$page = $_GET['page'] ?? 'dashboard';
-
-// ===== ROUTER SEDERHANA: index.php?page=dashboard =====
-$routes = [
-    'dashboard'   => 'pelanggan/pages/dashboard.php',
-    'mobil'       => 'pelanggan/pages/memilih mobil/mobil.php',
-    'sewa'        => 'pelanggan/pages/mengajukan sewa/sewa.php',
-    'sewa-tambah' => 'pelanggan/pages/mengajukan sewa/tambah.php',
-    'berkas'      => 'pelanggan/pages/berkas persetujuan/berkas.php',
-];
-$halaman = $routes[$page] ?? $routes['dashboard'];
+// Pengunjung boleh melihat-lihat mobil tanpa login.
+// Login baru diminta saat menekan "Pilih & Ajukan" (lihat pelanggan/ajukan.php).
+$pelangganId   = $sudahLogin ? (int) $_SESSION['id'] : 0;
+$namaPelanggan = $sudahLogin ? ($_SESSION['nama'] ?? '') : '';
 ?>
 <!DOCTYPE html>
 <html lang="id">
 
 <?php include 'pelanggan/partials/head.php' ?>
 
-<body id="page-top">
-    <div id="wrapper">
+<body class="index-page">
 
-        <?php include 'pelanggan/components/sidebar.php' ?>
+    <!-- Supaya judul bagian tidak tertutup menu yang menempel di atas -->
+    <style>html { scroll-padding-top: 90px; }</style>
 
-        <div id="content-wrapper" class="d-flex flex-column">
-            <div id="content">
+    <?php include 'pelanggan/components/header.php' ?>
 
-                <?php include 'pelanggan/components/topbar.php' ?>
+    <main class="main">
+        <!-- Satu halaman panjang, bagian-bagiannya berurutan dari atas ke bawah -->
+        <?php include 'pelanggan/dashboard.php'; ?>
+        <?php include 'pelanggan/pages/memilih mobil/mobil.php'; ?>
+        <?php if ($sudahLogin) { // bagian data pribadi hanya untuk yang sudah login ?>
+            <?php include 'pelanggan/pages/mengajukan sewa/sewa.php'; ?>
+            <?php include 'pelanggan/pages/berkas persetujuan/berkas.php'; ?>
+        <?php } ?>
+    </main>
 
-                <div class="container-fluid">
-                    <?php include $halaman; ?>
-                </div>
+    <?php include 'pelanggan/components/footer.php' ?>
+    <?php if ($sudahLogin) { include 'pelanggan/components/logout_modal.php'; } ?>
 
-            </div>
-
-            <?php include 'pelanggan/components/footer.php' ?>
-        </div>
-
-    </div>
-
-    <a class="scroll-to-top rounded" href="#page-top">
-        <i class="fas fa-angle-up"></i>
-    </a>
-
-    <!-- Logout Modal -->
-    <div class="modal fade" id="logoutModal" tabindex="-1" role="dialog" aria-labelledby="logoutLabel" aria-hidden="true">
-        <div class="modal-dialog" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="logoutLabel">Yakin ingin keluar?</h5>
-                    <button class="close" type="button" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body">Klik "Logout" jika Anda ingin mengakhiri sesi ini.</div>
-                <div class="modal-footer">
-                    <button class="btn btn-secondary" type="button" data-dismiss="modal">Batal</button>
-                    <a class="btn btn-primary" href="login/logout.php">Logout</a>
-                </div>
-            </div>
-        </div>
-    </div>
+    <!-- Scroll Top (wajib ada, dipakai main.js) -->
+    <a href="#" id="scroll-top" class="scroll-top d-flex align-items-center justify-content-center"><i class="bi bi-arrow-up-short"></i></a>
 
     <?php include 'pelanggan/partials/script.php' ?>
+
+    <!-- Menandai menu yang aktif sesuai bagian yang sedang dilihat -->
+    <script>
+        (function () {
+            var links = document.querySelectorAll('#navmenu a[href^="#"]');
+            function tandai() {
+                var aktif = null;
+                links.forEach(function (a) {
+                    var s = document.querySelector(a.getAttribute('href'));
+                    if (s && s.getBoundingClientRect().top <= 140) { aktif = a; }
+                });
+                links.forEach(function (a) { a.classList.remove('active'); });
+                if (aktif) { aktif.classList.add('active'); }
+            }
+            window.addEventListener('scroll', tandai);
+            window.addEventListener('load', tandai);
+        })();
+    </script>
 </body>
 
 </html>

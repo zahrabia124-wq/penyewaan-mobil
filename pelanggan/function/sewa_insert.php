@@ -1,52 +1,54 @@
 <?php
-// Memproses form "Ajukan Sewa" dari pelanggan.
-// Alur: terima data -> cek data -> simpan -> kembali ke daftar.
-session_start();
-
+// Menyimpan pengajuan sewa dari form di ajukan.php.
+// Pengajuan baru selalu berstatus "menunggu" sampai disetujui admin.
+require_once __DIR__ . '/../../login/cek_login.php';
+cek_login('pelanggan');
 require_once __DIR__ . '/../database/connection.php';
+
+if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+    header('Location: ../ajukan.php');
+    exit;
+}
+
 $db   = new Database();
 $conn = $db->conn;
 
-// Kalau file ini dibuka langsung (bukan dari form), kembalikan ke daftar
-if ($_SERVER['REQUEST_METHOD'] != 'POST') {
-    header('Location: ../../index.php?page=sewa');
+$pelangganId = (int) $_SESSION['id'];          // diambil dari sesi, bukan dari form
+$carId       = (int) ($_POST['car_id'] ?? 0);
+$tglSewa     = $_POST['tgl_sewa'] ?? '';
+$tglKembali  = $_POST['tgl_kembali'] ?? '';
+
+// Kembali ke form dengan kode pesan (teksnya ditampilkan di tambah.php)
+function balik($kode, $carId)
+{
+    header('Location: ../ajukan.php?car_id=' . (int) $carId . '&error=' . $kode);
     exit;
 }
 
-// Sementara sebelum ada login: pelanggan id 1 (samakan dengan index.php)
-$pelangganId = $_SESSION['id'] ?? 1;
-
-// 1. Ambil data dari form
-$car_id      = (int) $_POST['car_id'];
-$tgl_sewa    = $_POST['tgl_sewa'];
-$tgl_kembali = $_POST['tgl_kembali'];
-
-// 2. Cek isian
-if ($car_id == 0 || $tgl_sewa == '' || $tgl_kembali == '' || $tgl_kembali < $tgl_sewa) {
-    header('Location: ../../index.php?page=sewa-tambah');
-    exit;
+// Validasi tanggal: format yyyy-mm-dd, tidak boleh lewat, kembali tidak boleh sebelum sewa
+$formatOk = preg_match('/^\d{4}-\d{2}-\d{2}$/', $tglSewa) && preg_match('/^\d{4}-\d{2}-\d{2}$/', $tglKembali);
+if ($carId < 1 || !$formatOk) {
+    balik('data', $carId);
+}
+if ($tglSewa < date('Y-m-d')) {
+    balik('lewat', $carId);
+}
+if ($tglKembali < $tglSewa) {
+    balik('urutan', $carId);
 }
 
-try {
-    // 3. Cek mobilnya masih tersedia
-    $stmt = $conn->prepare("SELECT status_mobil FROM cars WHERE id = ?");
-    $stmt->bind_param('i', $car_id);
-    $stmt->execute();
-    $car = $stmt->get_result()->fetch_assoc();
-
-    if (!$car || $car['status_mobil'] != 'tersedia') {
-        header('Location: ../../index.php?page=sewa-tambah');
-        exit;
-    }
-
-    // 4. Simpan ke database, status awal selalu "menunggu"
-    $stmt = $conn->prepare("INSERT INTO rentals (pelanggan_id, car_id, tgl_sewa, tgl_kembali, status_rental)
-                            VALUES (?, ?, ?, ?, 'menunggu')");
-    $stmt->bind_param('iiss', $pelangganId, $car_id, $tgl_sewa, $tgl_kembali);
-    $stmt->execute();
-
-    header('Location: ../../index.php?page=sewa');
-} catch (Exception $e) {
-    header('Location: ../../index.php?page=sewa-tambah');
+// Mobil harus ada dan masih tersedia
+$cek = $conn->prepare("SELECT id FROM cars WHERE id = ? AND status_mobil = 'tersedia'");
+$cek->bind_param('i', $carId);
+$cek->execute();
+if ($cek->get_result()->num_rows === 0) {
+    balik('mobil', $carId);
 }
+
+$stmt = $conn->prepare("INSERT INTO rentals (pelanggan_id, car_id, tgl_sewa, tgl_kembali, status_rental)
+                        VALUES (?, ?, ?, ?, 'menunggu')");
+$stmt->bind_param('iiss', $pelangganId, $carId, $tglSewa, $tglKembali);
+$stmt->execute();
+
+header('Location: ../../index.php#sewa');
 exit;

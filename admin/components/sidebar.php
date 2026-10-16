@@ -57,6 +57,13 @@
             <span>Terbitkan Invoice</span></a>
     </li>
 
+    <!-- Nav Item - Kelola Pengguna -->
+    <li class="nav-item <?= strpos($page, 'pengguna') === 0 ? 'active' : '' ?>">
+        <a class="nav-link" href="index.php?page=pengguna">
+            <i class="fas fa-fw fa-users"></i>
+            <span>Kelola Pengguna</span></a>
+    </li>
+
     <!-- Divider -->
     <hr class="sidebar-divider d-none d-md-block">
 

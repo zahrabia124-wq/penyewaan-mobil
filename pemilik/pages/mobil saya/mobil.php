@@ -7,10 +7,10 @@ $hasil = $conn->query("SELECT cars.id, cars.foto, cars.merk, cars.plat_nomor,
                               cars.harga_sewa_per_hari AS harga_per_hari, cars.status_mobil AS status,
                               (SELECT COUNT(*) FROM rentals
                                WHERE rentals.car_id = cars.id
-                               AND rentals.status_rental IN ('disetujui','selesai')) AS jumlah_sewa,
+                               AND rentals.status_rental IN ('disetujui','berjalan','selesai')) AS jumlah_sewa,
                               (SELECT COALESCE(SUM(GREATEST(DATEDIFF(rentals.tgl_kembali, rentals.tgl_sewa), 1)), 0) FROM rentals
                                WHERE rentals.car_id = cars.id
-                               AND rentals.status_rental IN ('disetujui','selesai')) AS total_hari,
+                               AND rentals.status_rental IN ('disetujui','berjalan','selesai')) AS total_hari,
                               (SELECT COALESCE(SUM(payments.total_bayar), 0) FROM payments
                                JOIN rentals ON rentals.id = payments.rental_id
                                WHERE rentals.car_id = cars.id
@@ -63,8 +63,7 @@ $hasil = $conn->query("SELECT cars.id, cars.foto, cars.merk, cars.plat_nomor,
                             <td><?php echo $no; ?></td>
                             <td>
                                 <?php if ($row['foto'] != '') { ?>
-                                    <img src="../uploads/mobil/<?php echo $row['foto']; ?>" width="90">
-                                <?php } else { ?>
+                                  <img src="../foto/<?php echo htmlspecialchars($row['foto']); ?>" width="90">
                                     -
                                 <?php } ?>
                             </td>

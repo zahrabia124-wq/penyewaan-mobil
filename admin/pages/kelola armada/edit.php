@@ -10,7 +10,10 @@ $stmt->execute();
 $mobil = $stmt->get_result()->fetch_assoc();
 $stmt->close();
 
-$users = $conn->query("SELECT * FROM users ORDER BY id");
+// Hanya user dengan role pemilik yang bisa dipilih sebagai pemilik armada.
+// Pemilik yang sekarang tetap ikut tampil supaya datanya tidak berubah sendiri.
+$pemilikSekarang = (int) ($mobil['pemilik_id'] ?? 0);
+$users = $conn->query("SELECT * FROM users WHERE role LIKE '%pemilik%' OR id = $pemilikSekarang ORDER BY id");
 ?>
 
 <div class="d-sm-flex align-items-center justify-content-between mb-4">
@@ -74,7 +77,7 @@ $users = $conn->query("SELECT * FROM users ORDER BY id");
             <div class="form-group">
                 <label>Foto Mobil</label>
                 <?php if ($mobil['foto'] != '') { ?>
-                    <div><img src="../uploads/mobil/<?php echo $mobil['foto']; ?>" width="200"></div>
+                    <div><img src="../foto/<?php echo htmlspecialchars($mobil['foto']); ?>" width="200"></div>
                 <?php } ?>
                 <input type="file" name="foto" class="form-control-file" accept="image/jpeg,image/png">
                 <small class="text-muted">Kosongkan jika tidak ingin mengganti foto. JPG atau PNG, maksimal 2 MB.</small>

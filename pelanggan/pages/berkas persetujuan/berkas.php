@@ -2,7 +2,6 @@
 // Halaman berkas persetujuan: sewa milik pelanggan yang sudah disetujui admin,
 // lengkap dengan denda (tabel returns) dan invoice-nya (tabel payments) kalau sudah diterbitkan.
 // $conn = koneksi database, $pelangganId = id pelanggan, dibuat di index.php
-
 $stmt = $conn->prepare("SELECT rentals.id, rentals.tgl_sewa, rentals.tgl_kembali, rentals.status_rental,
                                cars.merk, cars.plat_nomor,
                                payments.id AS payment_id, payments.total_bayar, payments.status_pembayaran,
@@ -19,89 +18,99 @@ $stmt = $conn->prepare("SELECT rentals.id, rentals.tgl_sewa, rentals.tgl_kembali
 $stmt->bind_param('i', $pelangganId);
 $stmt->execute();
 $hasil = $stmt->get_result();
+$ada = false;
 ?>
 
-<div class="d-sm-flex align-items-center justify-content-between mb-4">
-    <h1 class="h3 mb-0 text-gray-800">Berkas Persetujuan</h1>
-    <button type="button" onclick="window.print()" class="d-print-none btn btn-sm btn-primary">Cetak</button>
-</div>
+<!-- Berkas Persetujuan Section -->
+<section id="berkas" class="section light-background">
 
-<div class="card shadow mb-4">
-    <div class="card-body">
-        <div class="table-responsive">
-            <table class="table table-bordered">
-                <thead>
-                    <tr>
-                        <th>No</th>
-                        <th>Mobil</th>
-                        <th>Tanggal Sewa</th>
-                        <th>Status Sewa</th>
-                        <th>Denda</th>
-                        <th>No. Invoice</th>
-                        <th>Total Tagihan</th>
-                        <th>Pembayaran</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <?php $no = 1; ?>
-                    <?php while ($row = $hasil->fetch_assoc()) { ?>
+  <div class="container section-title" data-aos="fade-up">
+    <span>Berkas</span>
+    <h2>Berkas Persetujuan</h2>
+    <p>Sewa yang disetujui, denda, dan invoice pembayaran</p>
+  </div>
 
-                        <?php
-                        if ($row['status_pembayaran'] == 'lunas') {
-                            $warna = 'success';
-                            $teks  = 'Lunas';
-                        } else {
-                            $warna = 'warning';
-                            $teks  = 'Belum bayar';
-                        }
-                        ?>
+  <div class="container">
 
-                        <tr>
-                            <td><?php echo $no; ?></td>
-                            <td>
-                                <?php echo htmlspecialchars($row['merk']); ?><br>
-                                <small><?php echo htmlspecialchars($row['plat_nomor']); ?></small>
-                            </td>
-                            <td>
-                                <?php echo date('d/m/Y', strtotime($row['tgl_sewa'])); ?>
-                                s/d
-                                <?php echo date('d/m/Y', strtotime($row['tgl_kembali'])); ?>
-                            </td>
-                            <td><span class="badge badge-success"><?php echo htmlspecialchars($row['status_rental']); ?></span></td>
-
-                            <!-- Denda: tampil walaupun invoice belum diterbitkan -->
-                            <td>
-                                <?php if ($row['total_denda'] > 0) { ?>
-                                    <span class="text-danger font-weight-bold">
-                                        Rp <?php echo number_format($row['total_denda'], 0, ',', '.'); ?>
-                                    </span>
-                                    <?php if (!empty($row['ket_denda'])) { ?>
-                                        <br><small class="text-muted"><?php echo htmlspecialchars($row['ket_denda']); ?></small>
-                                    <?php } ?>
-                                <?php } else { ?>
-                                    <span class="text-muted">-</span>
-                                <?php } ?>
-                            </td>
-
-                            <?php if ($row['payment_id']) { ?>
-                                <td>INV-<?php echo str_pad($row['payment_id'], 4, '0', STR_PAD_LEFT); ?></td>
-                                <td>Rp <?php echo number_format($row['total_bayar'], 0, ',', '.'); ?></td>
-                                <td><span class="badge badge-<?php echo $warna; ?>"><?php echo $teks; ?></span></td>
-                            <?php } else { ?>
-                                <td colspan="3" class="text-muted">Invoice belum diterbitkan</td>
-                            <?php } ?>
-                        </tr>
-
-                        <?php $no++; ?>
-                    <?php } ?>
-
-                    <?php if ($no == 1) { ?>
-                        <tr>
-                            <td colspan="8" class="text-center text-muted">Belum ada sewa yang disetujui.</td>
-                        </tr>
-                    <?php } ?>
-                </tbody>
-            </table>
-        </div>
+    <div class="d-flex justify-content-end mb-3 d-print-none">
+      <button type="button" onclick="window.print()" class="erent-btn sm"><i class="bi bi-printer"></i> Cetak</button>
     </div>
-</div>
+
+    <div class="row gy-4">
+
+      <?php while ($row = $hasil->fetch_assoc()) { ?>
+        <?php
+        $ada = true;
+        if ($row['status_pembayaran'] == 'lunas') {
+            $warna = 'b-success';
+            $teks  = 'Lunas';
+        } else {
+            $warna = 'b-warning';
+            $teks  = 'Belum bayar';
+        }
+        ?>
+        <div class="col-lg-6" data-aos="fade-up">
+          <div class="erent-box">
+
+            <div class="d-flex justify-content-between align-items-start mb-3">
+              <div>
+                <h4 class="mb-0"><i class="bi bi-car-front"></i> <?= htmlspecialchars($row['merk']) ?></h4>
+                <span class="erent-meta"><?= htmlspecialchars($row['plat_nomor']) ?></span>
+              </div>
+              <span class="erent-badge b-success"><?= htmlspecialchars($row['status_rental']) ?></span>
+            </div>
+
+            <div class="erent-row">
+              <span class="erent-meta">Tanggal sewa</span>
+              <span><?= date('d/m/Y', strtotime($row['tgl_sewa'])) ?> s/d <?= date('d/m/Y', strtotime($row['tgl_kembali'])) ?></span>
+            </div>
+
+            <!-- Denda: tampil walaupun invoice belum diterbitkan -->
+            <div class="erent-row">
+              <span class="erent-meta">Denda</span>
+              <span class="text-end">
+                <?php if ($row['total_denda'] > 0) { ?>
+                  <span class="text-danger fw-bold">Rp <?= number_format($row['total_denda'], 0, ',', '.') ?></span>
+                  <?php if (!empty($row['ket_denda'])) { ?>
+                    <br><small class="erent-meta"><?= htmlspecialchars($row['ket_denda']) ?></small>
+                  <?php } ?>
+                <?php } else { ?>
+                  -
+                <?php } ?>
+              </span>
+            </div>
+
+            <?php if ($row['payment_id']) { ?>
+              <div class="erent-row">
+                <span class="erent-meta">No. Invoice</span>
+                <span>INV-<?= str_pad($row['payment_id'], 4, '0', STR_PAD_LEFT) ?></span>
+              </div>
+              <div class="erent-row">
+                <span class="erent-meta">Total tagihan</span>
+                <strong>Rp <?= number_format($row['total_bayar'], 0, ',', '.') ?></strong>
+              </div>
+              <div class="erent-row">
+                <span class="erent-meta">Pembayaran</span>
+                <span class="erent-badge <?= $warna ?>"><?= $teks ?></span>
+              </div>
+            <?php } else { ?>
+              <div class="erent-row">
+                <span class="erent-meta">Invoice</span>
+                <span class="erent-meta">belum diterbitkan</span>
+              </div>
+            <?php } ?>
+
+          </div>
+        </div>
+      <?php } ?>
+
+      <?php if (!$ada) { ?>
+        <div class="col-12">
+          <div class="erent-item text-center erent-meta">Belum ada sewa yang disetujui.</div>
+        </div>
+      <?php } ?>
+
+    </div>
+  </div>
+
+</section><!-- /Berkas Persetujuan Section -->

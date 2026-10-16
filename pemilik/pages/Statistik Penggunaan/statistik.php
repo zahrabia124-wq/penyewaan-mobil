@@ -30,7 +30,7 @@ while ($m = $mobil->fetch_assoc()) {
     $carId = $m['id'];
     $sewa = $conn->query("SELECT tgl_sewa, tgl_kembali FROM rentals
                           WHERE car_id = $carId
-                          AND status_rental IN ('disetujui', 'selesai')
+                          AND status_rental IN ('disetujui', 'berjalan', 'selesai')
                           AND tgl_sewa <= '$sampai'
                           AND tgl_kembali >= '$dari'");
 

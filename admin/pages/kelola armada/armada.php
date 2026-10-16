@@ -47,7 +47,7 @@ $hasil = $conn->query("SELECT *, harga_sewa_per_hari AS harga_per_hari, status_m
                             <td><?php echo $no; ?></td>
                             <td>
                                 <?php if ($row['foto'] != '') { ?>
-                                    <img src="../uploads/mobil/<?php echo $row['foto']; ?>" width="90">
+                                   <img src="../foto/<?php echo htmlspecialchars($row['foto']); ?>" width="90">
                                 <?php } else { ?>
                                     -
                                 <?php } ?>

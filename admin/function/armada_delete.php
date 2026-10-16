@@ -1,4 +1,5 @@
 <?php
+require_once __DIR__ . '/../../login/cek_login.php'; cek_login('admin');
 require_once __DIR__ . '/../database/connection.php';
 $db = new Database();
 $conn = $db->conn;

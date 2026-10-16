@@ -1,4 +1,5 @@
 <?php
+require_once __DIR__ . '/../../login/cek_login.php'; cek_login('admin');
 // Memproses form "Proses Pengajuan": ubah status sewa, lalu sesuaikan status mobilnya.
 // Disetujui -> mobil jadi "disewa"
 // Menunggu / ditolak / selesai -> mobil kembali "tersedia"
