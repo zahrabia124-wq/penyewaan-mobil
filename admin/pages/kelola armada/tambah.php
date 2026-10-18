@@ -48,8 +48,8 @@ $users = $conn->query("SELECT * FROM users WHERE role LIKE '%pemilik%' ORDER BY 
             </div>
                      <div class="form-group">
                 <label>Foto Mobil</label>
-                <input type="file" name="foto" class="form-control-file" accept="image/jpeg,image/png">
-                <small class="text-muted">JPG atau PNG, maksimal 2 MB. Boleh dikosongkan.</small>
+                <input type="file" name="foto" class="form-control-file" accept="image/jpeg,image/png,image/webp,image/gif,image/bmp,image/avif">
+                <small class="text-muted">JPG, PNG, WEBP, GIF, BMP, atau AVIF, maksimal 2 MB. Boleh dikosongkan.</small>
             </div>
             <button type="submit" class="btn btn-primary">Simpan</button>
         </form>

@@ -2,11 +2,13 @@
 // Halaman daftar pengajuan sewa.
 
 // JOIN = gabungkan tabel rentals (sewa) dengan users (pelanggan) dan cars (mobil)
-// supaya nama pelanggan dan nama mobil ikut tampil
-$hasil = $conn->query("SELECT rentals.*, users.nama, users.email, cars.merk, cars.plat_nomor, cars.harga_sewa_per_hari
+// supaya nama pelanggan, nama mobil, dan nama pemilik ikut tampil
+$hasil = $conn->query("SELECT rentals.*, users.nama, users.email, cars.merk, cars.plat_nomor, cars.harga_sewa_per_hari,
+                              pemilik.nama AS nama_pemilik
                        FROM rentals
                        LEFT JOIN users ON users.id = rentals.pelanggan_id
                        JOIN cars ON cars.id = rentals.car_id
+                       LEFT JOIN users AS pemilik ON pemilik.id = cars.pemilik_id
                        ORDER BY rentals.id DESC");
 ?>
 
@@ -68,7 +70,8 @@ $hasil = $conn->query("SELECT rentals.*, users.nama, users.email, cars.merk, car
                             </td>
                             <td>
                                 <?php echo htmlspecialchars($row['merk']); ?><br>
-                                <small><?php echo htmlspecialchars($row['plat_nomor']); ?></small>
+                                <small><?php echo htmlspecialchars($row['plat_nomor']); ?></small><br>
+                                <small class="text-muted">Pemilik: <?php echo htmlspecialchars($row['nama_pemilik'] ?? 'tidak diketahui'); ?></small>
                             </td>
                             <td>
                                 <?php echo date('d/m/Y', strtotime($row['tgl_sewa'])); ?>

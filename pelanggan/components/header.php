@@ -21,9 +21,22 @@
         </nav>
 
         <?php if ($sudahLogin) { ?>
-            <a class="btn-getstarted" href="#" data-bs-toggle="modal" data-bs-target="#logoutModal">
-                <i class="bi bi-person-circle"></i> <?= htmlspecialchars($namaPelanggan) ?>
+            <!-- Nama pelanggan (hanya tampilan) + tombol Logout yang jelas -->
+            <span class="erent-user d-none d-md-inline-flex align-items-center">
+                <i class="bi bi-person-circle me-1"></i> <?= htmlspecialchars($namaPelanggan) ?>
+            </span>
+            <a class="btn-getstarted btn-logout" href="#" data-bs-toggle="modal" data-bs-target="#logoutModal">
+                <i class="bi bi-box-arrow-right"></i> Logout
             </a>
+            <style>
+                .header .erent-user { color: #fff; font-size: 14px; margin-left: 30px; }
+                .header .btn-getstarted.btn-logout { background: #dc3545; margin-left: 15px; }
+                .header .btn-getstarted.btn-logout:hover { background: #bb2d3b; }
+                @media (max-width: 1200px) {
+                    .header .erent-user { order: 2; margin: 0 15px 0 0; }
+                    .header .btn-getstarted.btn-logout { margin: 0 15px 0 0; }
+                }
+            </style>
         <?php } else { ?>
             <a class="btn-getstarted" href="<?= htmlspecialchars(($base ?? '') . $urlLogin) ?>">
                 <i class="bi bi-box-arrow-in-right"></i> Login

@@ -48,9 +48,9 @@ if (isset($_FILES['foto']) && $_FILES['foto']['error'] !== UPLOAD_ERR_NO_FILE) {
 
     $finfo = new finfo(FILEINFO_MIME_TYPE);
     $mime  = $finfo->file($f['tmp_name']);
-    $boleh = ['image/jpeg' => 'jpg', 'image/png' => 'png'];
+    $boleh = ['image/jpeg' => 'jpg', 'image/png' => 'png', 'image/webp' => 'webp', 'image/gif' => 'gif', 'image/bmp' => 'bmp', 'image/avif' => 'avif'];
     if (!isset($boleh[$mime])) {
-        header('Location: ../index.php?page=armada-edit&id=' . $id . '&status=gagal&pesan=' . urlencode('Foto harus berformat JPG atau PNG.'));
+        header('Location: ../index.php?page=armada-edit&id=' . $id . '&status=gagal&pesan=' . urlencode('Foto harus berformat JPG, PNG, WEBP, GIF, BMP, atau AVIF.'));
         exit;
     }
 

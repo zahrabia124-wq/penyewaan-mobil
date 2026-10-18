@@ -17,6 +17,7 @@ $totalArmada    = angka($conn, "SELECT COUNT(*) FROM cars");
 $armadaTersedia = angka($conn, "SELECT COUNT(*) FROM cars WHERE status_mobil = '$STATUS_TERSEDIA'");
 $totalMenunggu  = angka($conn, "SELECT COUNT(*) FROM rentals WHERE pelanggan_id = $idPelanggan AND status_rental = '$STATUS_MENUNGGU'");
 $totalBerjalan  = angka($conn, "SELECT COUNT(*) FROM rentals WHERE pelanggan_id = $idPelanggan AND status_rental = '$STATUS_BERJALAN'");
+$totalSewa      = angka($conn, "SELECT COUNT(*) FROM rentals WHERE pelanggan_id = $idPelanggan");
 $totalBayar     = angka($conn, "SELECT COALESCE(SUM(payments.total_bayar),0) FROM payments
                                 JOIN rentals ON rentals.id = payments.rental_id
                                 WHERE rentals.pelanggan_id = $idPelanggan AND payments.status_pembayaran = '$STATUS_LUNAS'");
@@ -84,8 +85,8 @@ $aktif = $qAktif ? $qAktif->fetch_assoc() : null;
           </div>
           <div class="col-lg-3 col-6">
             <div class="stats-item text-center w-100 h-100">
-              <span><?= $totalBerjalan ?></span>
-              <p>Berjalan</p>
+              <span><?= $totalSewa ?></span>
+              <p>Total Sewa</p>
             </div>
           </div>
           <?php } ?>
@@ -139,7 +140,7 @@ $aktif = $qAktif ? $qAktif->fetch_assoc() : null;
 <!-- Call To Action Section -->
 <section id="call-to-action" class="call-to-action section dark-background">
 
-  <img src="<?= $tpl ?>/img/cta-bg.jpg" alt="">
+  <img src="foto/sewa.jpg" alt="">
 
   <div class="container">
     <div class="row justify-content-center" data-aos="zoom-in" data-aos-delay="100">
