@@ -10,12 +10,21 @@ $hasil = $conn->query("SELECT rentals.*, users.nama, users.email, cars.merk, car
                        JOIN cars ON cars.id = rentals.car_id
                        LEFT JOIN users AS pemilik ON pemilik.id = cars.pemilik_id
                        ORDER BY rentals.id DESC");
+
+$status = $_GET['status'] ?? '';
+$pesan  = $_GET['pesan'] ?? '';
 ?>
 
 <div class="d-sm-flex align-items-center justify-content-between mb-4">
     <h1 class="h3 mb-0 text-gray-800">Pengajuan Sewa</h1>
     <a href="index.php?page=sewa-tambah" class="btn btn-sm btn-primary">+ Tambah Pengajuan</a>
 </div>
+
+<?php if ($pesan != '') { ?>
+    <div class="alert alert-<?php echo ($status == 'sukses') ? 'success' : 'danger'; ?>">
+        <?php echo htmlspecialchars($pesan); ?>
+    </div>
+<?php } ?>
 
 <div class="card shadow mb-4">
     <div class="card-body">

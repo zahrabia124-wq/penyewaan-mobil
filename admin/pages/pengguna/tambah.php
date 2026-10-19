@@ -5,7 +5,7 @@ $pesan  = $_GET['pesan'] ?? '';
 ?>
 
 <div class="d-sm-flex align-items-center justify-content-between mb-4">
-    <h1 class="h3 mb-0 text-gray-800">Tambah Pengguna</h1>
+    <h1 class="h3 mb-0 text-gray-800">Tambah User</h1>
     <a href="index.php?page=pengguna" class="btn btn-sm btn-secondary">Kembali</a>
 </div>
 
@@ -39,7 +39,6 @@ $pesan  = $_GET['pesan'] ?? '';
                 <label>Role</label>
                 <select name="role" class="form-control" required>
                     <option value="">-- Pilih role --</option>
-                    <option value="pelanggan">Pelanggan</option>
                     <option value="pemilik">Pemilik Kendaraan</option>
                 </select>
             </div>

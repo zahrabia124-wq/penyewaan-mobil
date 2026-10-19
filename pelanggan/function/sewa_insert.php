@@ -49,6 +49,8 @@ $stmt = $conn->prepare("INSERT INTO rentals (pelanggan_id, car_id, tgl_sewa, tgl
                         VALUES (?, ?, ?, ?, 'menunggu')");
 $stmt->bind_param('iiss', $pelangganId, $carId, $tglSewa, $tglKembali);
 $stmt->execute();
+$idBaru = (int) $conn->insert_id;
 
-header('Location: ../../index.php#sewa');
+// Kembali ke daftar "Pengajuan Sewa Saya", membawa id pengajuan baru supaya disorot
+header('Location: ../../index.php?baru=' . $idBaru . '#sewa');
 exit;

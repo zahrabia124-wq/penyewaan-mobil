@@ -1,40 +1,62 @@
 <?php
-// Menghapus 1 pengguna berdasarkan id.
-// Tidak bisa menghapus akun sendiri, dan tidak bisa kalau pengguna masih punya data sewa/armada.
-require_once __DIR__ . '/../../login/cek_login.php';
-cek_login('admin');
+require_once __DIR__ . '/../../login/cek_login.php'; cek_login('admin');
+// Menghapus 1 pengajuan sewa (tabel rentals) berdasarkan id.
+// Kalau sewa itu sedang disetujui, mobilnya dikembalikan jadi "tersedia".
+// Tidak bisa dihapus kalau sudah punya denda (returns) atau invoice (payments).
 require_once __DIR__ . '/../database/connection.php';
 $db   = new Database();
 $conn = $db->conn;
 
-if ($_SERVER['REQUEST_METHOD'] != 'POST') {
-    header('Location: ../index.php?page=pengguna');
+if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+    header('Location: ../index.php?page=sewa');
     exit;
 }
 
-$id     = (int) ($_POST['id'] ?? 0);
-$idSaya = (int) ($_SESSION['id'] ?? 0);
+$id = (int) ($_POST['id'] ?? 0);
 
-if ($id == 0 || $id == $idSaya) {
-    header('Location: ../index.php?page=pengguna&status=gagal&pesan=' . urlencode('Pengguna tidak bisa dihapus.'));
+function balik($status, $pesan)
+{
+    header('Location: ../index.php?page=sewa&status=' . $status . '&pesan=' . urlencode($pesan));
     exit;
+}
+
+if ($id <= 0) {
+    balik('gagal', 'Pengajuan tidak ditemukan.');
 }
 
 try {
-    // Hanya pelanggan dan pemilik yang boleh dihapus lewat halaman ini (admin tidak)
-    $stmt = $conn->prepare("DELETE FROM users WHERE id = ? AND role IN ('pelanggan', 'pemilik')");
+    $stmt = $conn->prepare("SELECT car_id, status_rental FROM rentals WHERE id = ?");
     $stmt->bind_param('i', $id);
     $stmt->execute();
+    $sewa = $stmt->get_result()->fetch_assoc();
+    $stmt->close();
 
-    if ($stmt->affected_rows == 0) {
-        header('Location: ../index.php?page=pengguna&status=gagal&pesan=' . urlencode('Pengguna tidak ditemukan atau tidak boleh dihapus.'));
-        exit;
+    if (!$sewa) {
+        balik('gagal', 'Pengajuan tidak ditemukan.');
     }
 
-    header('Location: ../index.php?page=pengguna&status=sukses&pesan=' . urlencode('Pengguna berhasil dihapus.'));
+    $conn->begin_transaction();
+
+    $stmt = $conn->prepare("DELETE FROM rentals WHERE id = ?");
+    $stmt->bind_param('i', $id);
+    $stmt->execute();
+    $stmt->close();
+
+    // Sewa yang sedang disetujui membuat mobil berstatus "disewa" -> kembalikan jadi "tersedia"
+    if ($sewa['status_rental'] === 'disetujui') {
+        $stmt = $conn->prepare("UPDATE cars SET status_mobil = 'tersedia' WHERE id = ?");
+        $stmt->bind_param('i', $sewa['car_id']);
+        $stmt->execute();
+        $stmt->close();
+    }
+
+    $conn->commit();
+    balik('sukses', 'Pengajuan berhasil dihapus.');
 } catch (Exception $e) {
-    // Kode 1451 = masih dipakai di tabel lain (sewa / armada)
-    $pesan = ($e->getCode() == 1451) ? 'Pengguna masih punya data sewa atau armada, tidak bisa dihapus.' : 'Gagal menghapus: ' . $e->getMessage();
-    header('Location: ../index.php?page=pengguna&status=gagal&pesan=' . urlencode($pesan));
+    $conn->rollback();
+    // Kode 1451 = masih dipakai di tabel lain (denda / invoice)
+    $pesan = ($e->getCode() == 1451)
+        ? 'Pengajuan ini sudah punya denda atau invoice, jadi tidak bisa dihapus.'
+        : 'Gagal menghapus: ' . $e->getMessage();
+    balik('gagal', $pesan);
 }
-exit;

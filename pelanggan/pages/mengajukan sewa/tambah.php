@@ -2,6 +2,13 @@
 // Form pengajuan sewa. Saat disimpan, data dikirim ke function/sewa_insert.php
 // Pilihan mobil hanya menampilkan mobil yang statusnya "tersedia".
 $carDipilih = (int) ($_GET['car_id'] ?? 0);
+$pesanError = [
+    'data'   => 'Data belum lengkap atau formatnya salah. Periksa lagi mobil dan tanggalnya.',
+    'lewat'  => 'Tanggal sewa tidak boleh sebelum hari ini.',
+    'urutan' => 'Tanggal kembali tidak boleh sebelum tanggal sewa.',
+    'mobil'  => 'Mobil ini sudah tidak tersedia. Silakan pilih mobil lain.',
+];
+$kodeError = $_GET['error'] ?? '';
 $mobil = $conn->query("SELECT *, harga_sewa_per_hari AS harga_per_hari FROM cars WHERE status_mobil = 'tersedia' ORDER BY merk");
 ?>
 
@@ -9,6 +16,10 @@ $mobil = $conn->query("SELECT *, harga_sewa_per_hari AS harga_per_hari FROM cars
     <div class="col-lg-7">
         <div class="card border-0 shadow-sm">
             <div class="card-body p-4">
+                <?php if (isset($pesanError[$kodeError])) { ?>
+                    <div class="alert alert-danger"><?= htmlspecialchars($pesanError[$kodeError]) ?></div>
+                <?php } ?>
+
                 <form action="pelanggan/function/sewa_insert.php" method="POST">
 
                     <div class="mb-3">
@@ -37,7 +48,7 @@ $mobil = $conn->query("SELECT *, harga_sewa_per_hari AS harga_per_hari FROM cars
 
                     <p class="text-muted small">Total harga dihitung otomatis: lama sewa x harga per hari.</p>
 
-                    <a href="index.php?page=sewa" class="btn btn-secondary">Kembali</a>
+                    <a href="index.php#sewa" class="btn btn-secondary">Kembali</a>
                     <button type="submit" class="btn btn-primary">Ajukan</button>
                 </form>
             </div>

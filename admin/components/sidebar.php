@@ -61,7 +61,7 @@
     <li class="nav-item <?= strpos($page, 'pengguna') === 0 ? 'active' : '' ?>">
         <a class="nav-link" href="index.php?page=pengguna">
             <i class="fas fa-fw fa-users"></i>
-            <span>Kelola Pengguna</span></a>
+            <span>Kelola User</span></a>
     </li>
 
     <!-- Divider -->

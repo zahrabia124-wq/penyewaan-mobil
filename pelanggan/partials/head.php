@@ -6,9 +6,8 @@
     <title>E-Rent - Pelanggan</title>
     <meta name="description" content="Sistem penyewaan dan rental mobil E-Rent">
 
-    <!-- Favicon -->
-    <link href="<?= $tpl ?>/img/favicon.png" rel="icon">
-    <link href="<?= $tpl ?>/img/apple-touch-icon.png" rel="apple-touch-icon">
+      <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%234e73df'/><text x='50' y='68' font-size='58' text-anchor='middle'>🚗</text></svg>">
 
     <!-- Fonts -->
     <link href="https://fonts.googleapis.com" rel="preconnect">

@@ -21,9 +21,15 @@ if ($id == 0 || $id == $idSaya) {
 }
 
 try {
-    $stmt = $conn->prepare("DELETE FROM users WHERE id = ?");
+    // Hanya pelanggan dan pemilik yang boleh dihapus lewat halaman ini (admin tidak)
+    $stmt = $conn->prepare("DELETE FROM users WHERE id = ? AND role IN ('pelanggan', 'pemilik')");
     $stmt->bind_param('i', $id);
     $stmt->execute();
+
+    if ($stmt->affected_rows == 0) {
+        header('Location: ../index.php?page=pengguna&status=gagal&pesan=' . urlencode('Pengguna tidak ditemukan atau tidak boleh dihapus.'));
+        exit;
+    }
 
     header('Location: ../index.php?page=pengguna&status=sukses&pesan=' . urlencode('Pengguna berhasil dihapus.'));
 } catch (Exception $e) {

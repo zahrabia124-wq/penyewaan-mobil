@@ -10,6 +10,10 @@ $stmt->bind_param('i', $pelangganId);
 $stmt->execute();
 $hasil = $stmt->get_result();
 $ada = false;
+
+// Notifikasi setelah pelanggan menekan "Ajukan" (dikirim dari function/sewa_insert.php)
+$idBaru = (int) ($_GET['baru'] ?? 0);   // dikirim dari popup di ajukan.php
+$sukses = ($idBaru > 0);
 ?>
 
 <!-- Pengajuan Sewa Saya Section -->
@@ -22,6 +26,16 @@ $ada = false;
   </div>
 
   <div class="container">
+
+    <?php if ($sukses) { ?>
+      <script>
+        // Hapus ?baru=... dari alamat supaya sorotan tidak muncul lagi saat halaman di-refresh
+        if (window.history.replaceState) {
+          window.history.replaceState(null, '', window.location.pathname + '#sewa');
+        }
+      </script>
+    <?php } ?>
+
     <div class="row gy-3">
 
       <?php while ($row = $hasil->fetch_assoc()) { ?>
@@ -45,10 +59,13 @@ $ada = false;
         $total = $hari * $row['harga_sewa_per_hari'];
         ?>
         <div class="col-12" data-aos="fade-up">
-          <div class="erent-item">
+          <!-- Pengajuan yang baru dikirim diberi bingkai hijau supaya mudah ditemukan -->
+          <div class="erent-item" <?= ($sukses && $row['id'] == $idBaru) ? 'style="border: 2px solid #198754;"' : '' ?>>
             <div class="row align-items-center gy-2">
               <div class="col-md-3">
-                <h5 class="mb-0"><i class="bi bi-car-front"></i> <?= htmlspecialchars($row['merk']) ?></h5>
+                <h5 class="mb-0"><i class="bi bi-car-front"></i> <?= htmlspecialchars($row['merk']) ?>
+                  <?php if ($sukses && $row['id'] == $idBaru) { ?><span class="badge bg-success ms-1">Baru</span><?php } ?>
+                </h5>
                 <span class="erent-meta"><?= htmlspecialchars($row['plat_nomor']) ?></span>
               </div>
               <div class="col-md-3">

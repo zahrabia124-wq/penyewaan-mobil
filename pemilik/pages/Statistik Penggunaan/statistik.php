@@ -1,9 +1,28 @@
 <?php
 // Halaman statistik penggunaan mobil milik pemilik, bisa difilter per rentang tanggal.
 
-// 1. Ambil tanggal dari filter. Kalau belum diisi: awal tahun ini sampai hari ini
-$dari   = $_GET['dari']   ?? date('Y-01-01');
-$sampai = $_GET['sampai'] ?? date('Y-m-d');
+// 1. Ambil tanggal dari filter.
+//    Kalau belum diisi: mulai dari awal tahun ini sampai hari ini, tapi diperlebar otomatis
+//    supaya semua sewa yang sudah disetujui (termasuk yang jadwalnya di depan) ikut tampil.
+$dari   = $_GET['dari']   ?? '';
+$sampai = $_GET['sampai'] ?? '';
+
+if ($dari === '' || $sampai === '') {
+    $dariDefault   = date('Y-01-01');
+    $sampaiDefault = date('Y-m-d');
+
+    $rentang = $conn->query("SELECT MIN(rentals.tgl_sewa) AS awal, MAX(rentals.tgl_kembali) AS akhir
+                             FROM rentals
+                             JOIN cars ON cars.id = rentals.car_id
+                             WHERE cars.pemilik_id = $pemilikId
+                             AND rentals.status_rental IN ('disetujui', 'berjalan', 'selesai')")->fetch_assoc();
+
+    if (!empty($rentang['awal'])  && $rentang['awal']  < $dariDefault)   { $dariDefault   = $rentang['awal']; }
+    if (!empty($rentang['akhir']) && $rentang['akhir'] > $sampaiDefault) { $sampaiDefault = $rentang['akhir']; }
+
+    if ($dari === '')   { $dari   = $dariDefault; }
+    if ($sampai === '') { $sampai = $sampaiDefault; }
+}
 
 // Rapikan format tanggal supaya aman dipakai di query
 $dari   = date('Y-m-d', strtotime($dari));
@@ -51,7 +70,7 @@ while ($m = $mobil->fetch_assoc()) {
     }
 
     // Okupansi = hari tersewa dibagi hari dalam periode (maksimal 100%)
-    $okupansi = round($hariTersewa / $hariPeriode * 100);
+    $okupansi = round($hariTersewa / $hariPeriode * 100, 1);
     if ($okupansi > 100) {
         $okupansi = 100;
     }
@@ -74,7 +93,7 @@ while ($m = $mobil->fetch_assoc()) {
 $jumlahMobil  = count($data);
 $okupansiRata = 0;
 if ($jumlahMobil > 0) {
-    $okupansiRata = round($totalHari / ($jumlahMobil * $hariPeriode) * 100);
+    $okupansiRata = round($totalHari / ($jumlahMobil * $hariPeriode) * 100, 1);
     if ($okupansiRata > 100) {
         $okupansiRata = 100;
     }
@@ -133,7 +152,7 @@ if ($jumlahMobil > 0) {
         <div class="card border-left-success shadow h-100 py-2">
             <div class="card-body">
                 <div class="text-xs font-weight-bold text-success text-uppercase mb-1">Okupansi Rata-rata</div>
-                <div class="h5 mb-0 font-weight-bold text-gray-800"><?php echo $okupansiRata; ?>%</div>
+                <div class="h5 mb-0 font-weight-bold text-gray-800"><?php echo number_format($okupansiRata, 1, ',', '.'); ?>%</div>
             </div>
         </div>
     </div>
@@ -181,10 +200,11 @@ if ($jumlahMobil > 0) {
                             <td><?php echo $row['hari_tersewa']; ?> hari</td>
                             <td>
                                 <!-- Bar persen okupansi -->
-                                <div class="progress" style="height: 18px;">
-                                    <div class="progress-bar bg-success" style="width: <?php echo $row['okupansi']; ?>%">
-                                        <?php echo $row['okupansi']; ?>%
+                                <div class="d-flex align-items-center">
+                                    <div class="progress flex-grow-1" style="height: 18px;">
+                                        <div class="progress-bar bg-success" style="width: <?php echo ($row['okupansi'] > 0) ? max($row['okupansi'], 2) : 0; ?>%"></div>
                                     </div>
+                                    <span class="ml-2 font-weight-bold" style="min-width: 55px;"><?php echo number_format($row['okupansi'], 1, ',', '.'); ?>%</span>
                                 </div>
                             </td>
                         </tr>

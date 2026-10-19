@@ -10,8 +10,8 @@ $pesan  = $_GET['pesan'] ?? '';
 ?>
 
 <div class="d-sm-flex align-items-center justify-content-between mb-4">
-    <h1 class="h3 mb-0 text-gray-800">Kelola Pengguna</h1>
-    <a href="index.php?page=pengguna-tambah" class="btn btn-sm btn-primary">+ Tambah Pengguna</a>
+    <h1 class="h3 mb-0 text-gray-800">Kelola User</h1>
+    <a href="index.php?page=pengguna-tambah" class="btn btn-sm btn-primary">+ Tambah User</a>
 </div>
 
 <?php if ($pesan != '') { ?>
